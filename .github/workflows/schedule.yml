@@ -20,10 +20,10 @@ jobs:
       - name: Vorschläge generieren
         run: python generate_vorschlaege.py
 
-      - name: Änderungen committen
-        run: |
-          git config --global user.name 'hevolo-bot'
-          git config --global user.email 'bot@hevolo.de'
-          git add vorschlaege.json
-          git commit -m 'update: automatische Vorschläge' || echo 'nichts zu committen'
-          git push
+- name: Änderungen committen und pushen (mit Auth)
+  run: |
+    git config --global user.name 'hevolo-bot'
+    git config --global user.email 'bot@hevolo.de'
+    git add vorschlaege.json
+    git commit -m 'update: automatische Vorschläge' || echo 'nichts zu committen'
+    git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:main
