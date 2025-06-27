@@ -18,7 +18,7 @@ jobs:
           python-version: '3.x'
 
       - name: Vorschläge generieren
-        run: hevolo-scout-github-backend/python generate_vorschlaege.py
+        run: python generate_vorschlaege.py
 
       - name: Änderungen committen
         run: |
