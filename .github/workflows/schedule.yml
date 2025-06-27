@@ -2,28 +2,31 @@ name: Wöchentliche Vorschlagserstellung
 
 on:
   schedule:
-    - cron: '0 7 * * 1'
+    - cron: '0 7 * * 1'  # jeden Montag um 07:00 Uhr UTC
   workflow_dispatch:
 
 jobs:
-  build:
+  generate:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Repository klonen
+      - name: 📥 Repository klonen
         uses: actions/checkout@v3
 
-      - name: Python installieren
+      - name: 🐍 Python installieren
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
-      - name: Vorschläge generieren
-        run: python generate_vorschlaege.py
+      - name: 📄 Vorschläge erzeugen
+        run: |
+          ls -la
+          python generate_vorschlaege.py
 
-- name: Änderungen committen und pushen (mit Auth)
-  run: |
-    git config --global user.name 'hevolo-bot'
-    git config --global user.email 'bot@hevolo.de'
-    git add vorschlaege.json
-    git commit -m 'update: automatische Vorschläge' || echo 'nichts zu committen'
-    git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:main
+      - name: 💾 Änderungen committen und pushen (mit Auth)
+        run: |
+          git config --global user.name "hevolo-bot"
+          git config --global user.email "bot@hevolo.de"
+          git add vorschlaege.json
+          git commit -m "update: automatische Vorschläge" || echo "nichts zu committen"
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:main
