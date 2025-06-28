@@ -18,8 +18,8 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: 📦 Abhängigkeiten installieren
-        run: pip install openai
+      - name: 📦 Abhängigkeiten installieren (alte Version)
+        run: pip install openai==0.28
 
       - name: 📄 Vorschläge erzeugen
         run: |
