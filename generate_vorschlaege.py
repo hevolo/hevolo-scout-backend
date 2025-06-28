@@ -9,7 +9,7 @@ import random
 openai.api_key = os.getenv("OPENAI_API_KEY")
 tikapi_key = os.getenv("TIKAPI_KEY")
 
-hashtags = ["tiktokmademebuyit", "cleantok", "viralcleaning", "kitchenhack"]
+tag = ["tiktokmademebuyit", "cleantok", "viralcleaning", "kitchenhack"]
 headers = {"Authorization": f"Bearer {tikapi_key}"}
 video = None
 
