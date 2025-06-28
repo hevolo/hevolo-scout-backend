@@ -26,6 +26,7 @@ jobs:
 
       - name: 📄 Vorschläge erzeugen
         env:
+          TIKAPI_KEY: ${{ secrets.TIKAPI_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           ls -la
