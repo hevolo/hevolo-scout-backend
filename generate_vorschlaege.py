@@ -11,7 +11,7 @@ tikapi_key = os.getenv("TIKAPI_KEY")
 # === TikAPI: Trending Video laden ===
 headers = {"Authorization": f"Bearer {tikapi_key}"}
 response = requests.get(
-    "https://api.tikapi.io/public/posts/search?query=%23tiktokmademebuyit&count=1",
+    "https://api.tikapi.io/hashtag/tiktokmademebuyit/feed?count=5",
     headers=headers
 )
 
