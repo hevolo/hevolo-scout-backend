@@ -1,9 +1,10 @@
 import json
 import datetime
 import openai
+import os
 
 # ⛽ GPT vorbereiten
-openai.api_key = "sk-..."  # Hier wird dein echter OpenAI API-Key gesetzt
+openai.api_key = os.getenv("OPENAI_API_KEY")  # Hier wird dein echter OpenAI API-Key gesetzt
 
 # 🔍 Simulierter Trend-Eintrag von TikTok
 trendprodukt = {
