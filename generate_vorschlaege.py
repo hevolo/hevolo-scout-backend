@@ -2,44 +2,43 @@ import os
 import json
 import datetime
 import openai
-import requests
-import random
+from tikapi import TikAPI, ValidationException, ResponseException
 
 # API-Zugänge aus GitHub Secrets
 openai.api_key = os.getenv("OPENAI_API_KEY")
 tikapi_key = os.getenv("TIKAPI_KEY")
 
-tag = ["tiktokmademebuyit", "cleantok", "viralcleaning", "kitchenhack"]
-headers = {"Authorization": f"Bearer {tikapi_key}"}
+hashtags = ["tiktokmademebuyit", "cleantok", "viralcleaning", "kitchenhack"]
+api = TikAPI(tikapi_key)
 video = None
 
-def get_tiktok_videos(tag):
-    url = f"https://api.tikapi.io/public/hashtag?name={tag}&count=5"
-    response = requests.get(url, headers=headers)
-    print(f"TikAPI Antwort für #{tag}:", response.status_code)
+for tag in hashtags:
+    print(f"🔍 Suche nach Hashtag: #{tag}")
     try:
-        return response.json().get("data", [])
-    except Exception as e:
-        print("Fehler beim Verarbeiten der API-Antwort:", e)
-        return []
+        response = api.public.hashtag(name=tag)
+        hashtag_id = response.json()['challengeInfo']['challenge']['id']
 
-for tag in tag:
-    print(f"🔍 Versuche Hashtag: #{tag}")
-    posts = get_tiktok_videos(tag)
-    for v in posts:
-        if v.get("desc") and v.get("id") and v.get("author"):
-            video = v
+        feed_response = api.public.hashtag(id=hashtag_id, count=5)
+        posts = feed_response.json().get("itemList", [])
+
+        for v in posts:
+            if v.get("desc") and v.get("id") and v.get("author"):
+                video = v
+                break
+        if video:
             break
-    if video:
-        break
+    except ValidationException as e:
+        print("Validierungsfehler:", e, e.field)
+    except ResponseException as e:
+        print("Antwortfehler:", e, e.response.status_code)
 
 if not video:
     raise ValueError("Kein TikTok-Video zu den Hashtags gefunden.")
 
-video_url = f"https://www.tiktok.com/@{video['author']['unique_id']}/video/{video['id']}"
-likes = video['stats']['digg_count']
-comments = video['stats']['comment_count']
-date = datetime.datetime.fromtimestamp(video['create_time']).strftime('%d.%m.%Y')
+video_url = f"https://www.tiktok.com/@{video['author']['uniqueId']}/video/{video['id']}"
+likes = video['stats']['diggCount']
+comments = video['stats']['commentCount']
+date = datetime.datetime.fromtimestamp(video['createTime']).strftime('%d.%m.%Y')
 
 beschreibung = video['desc'][:1000]
 prompt = f"""
