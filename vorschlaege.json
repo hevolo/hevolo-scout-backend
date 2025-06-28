@@ -1,1 +1,19 @@
-
+{
+  "last_update": "28.06.2025",
+  "vorschlaege": [
+    {
+      "name": "StickyRoll™ Fusselroller",
+      "problem": "Welches Problem wird gelöst?",
+      "loesung": "Das Produkt StickyRoll™ Fusselroller löst das alltägliche Problem von Tierhaaren und Fusseln auf Kleidung, Möbeln und anderen Oberflächen.",
+      "zielgruppe": "",
+      "usp": "2. Wie sieht die Lösung konkret aus?",
+      "empfehlung": "Die Lösung besteht aus einem wiederverwendbaren, abwaschbaren Fusselroller, der eine starke Haftung hat. Nach der Nutzung kann der Roller einfach unter fließendem Wasser abgespült werden, sodass er für den nächsten Einsatz bereit ist.",
+      "ek": 4.99,
+      "vk": 19.99,
+      "versand": 2.99,
+      "marge": 12.01,
+      "haendler": "https://www.aliexpress.com/item/1005001234567890.html",
+      "tiktok": "https://www.tiktok.com/@trendtok/video/123456789"
+    }
+  ]
+}
