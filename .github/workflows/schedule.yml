@@ -22,9 +22,12 @@ jobs:
         run: pip install openai==0.28
 
       - name: 📄 Vorschläge erzeugen
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           ls -la
           python generate_vorschlaege.py
+
 
       - name: 💾 Änderungen committen und pushen (mit Auth)
         run: |
