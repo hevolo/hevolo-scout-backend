@@ -21,6 +21,9 @@ jobs:
       - name: 📦 Abhängigkeiten installieren (alte Version)
         run: pip install openai==0.28
 
+      - name: Installiere TikAPI SDK
+        run: pip install tikapi
+
       - name: 📄 Vorschläge erzeugen
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
