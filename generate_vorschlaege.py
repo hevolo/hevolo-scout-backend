@@ -7,6 +7,8 @@ from tikapi import TikAPI, ValidationException, ResponseException
 # API-Zugänge aus GitHub Secrets
 openai.api_key = os.getenv("OPENAI_API_KEY")
 tikapi_key = os.getenv("TIKAPI_KEY")
+print("TIKAPI_KEY vorhanden?", bool(tikapi_key))
+
 
 hashtags = ["tiktokmademebuyit", "cleantok", "viralcleaning", "kitchenhack"]
 api = TikAPI(tikapi_key)
