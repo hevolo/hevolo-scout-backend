@@ -16,6 +16,8 @@ response = requests.get(
 )
 
 data = response.json()
+print(json.dumps(data, indent=2))
+
 video = data["data"][0] if data.get("data") else None
 
 if not video:
