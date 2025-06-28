@@ -1,58 +1,67 @@
+import os
 import json
 import datetime
 import openai
-import os
+import requests
 
-# ⛽ GPT vorbereiten
-openai.api_key = os.getenv("OPENAI_API_KEY")  # Hier wird dein echter OpenAI API-Key gesetzt
+# API-Zugänge aus GitHub Secrets
+openai.api_key = os.getenv("OPENAI_API_KEY")
+tikapi_key = os.getenv("TIKAPI_KEY")
 
-# 🔍 Simulierter Trend-Eintrag von TikTok
-trendprodukt = {
-    "name": "StickyRoll™ Fusselroller",
-    "video_url": "https://www.tiktok.com/@trendtok/video/123456789",
-    "beschreibung": "Ein wiederverwendbarer, abwaschbarer Fusselroller mit starker Haftung für Tierhaare und Kleidung."
-}
-
-# 💡 GPT: Analysiere das Produkt
-prompt = f"""
-Analysiere folgendes virales Produkt aus dem englischen TikTok-Markt und gib mir folgende Informationen auf Deutsch:
-
-1. Welches Problem wird gelöst?
-2. Wie sieht die Lösung konkret aus?
-3. Wer ist die Zielgruppe?
-4. Was ist das Alleinstellungsmerkmal (USP)?
-5. Empfiehlst du dieses Produkt für einen deutschen Haushaltswaren-Shop?
-
-Produktname: {trendprodukt['name']}
-Beschreibung: {trendprodukt['beschreibung']}
-"""
-
-response = openai.ChatCompletion.create(
-    model="gpt-4",
-    messages=[{"role": "user", "content": prompt}],
-    temperature=0.7
+# === TikAPI: Trending Video laden ===
+headers = {"Authorization": f"Bearer {tikapi_key}"}
+response = requests.get(
+    "https://api.tikapi.io/public/posts/search?query=%23tiktokmademebuyit&count=1",
+    headers=headers
 )
 
-antwort = response.choices[0].message.content.strip().split("\n")
+data = response.json()
+video = data["data"][0] if data.get("data") else None
 
-# 📦 AliExpress-Simulation (manuell ausgewählt)
-aliexpress_url = "https://www.aliexpress.com/item/1005001234567890.html"
+if not video:
+    raise ValueError("Kein TikTok-Video gefunden.")
 
-# 📊 Preiskalkulation
-ek = 4.99
+video_url = f"https://www.tiktok.com/@{video['author']['unique_id']}/video/{video['id']}"
+likes = video['stats']['digg_count']
+comments = video['stats']['comment_count']
+date = datetime.datetime.fromtimestamp(video['create_time']).strftime('%d.%m.%Y')
+
+# === GPT: Produkt analysieren ===
+beschreibung = video['desc'][:1000]
+prompt = f"""
+Analysiere folgendes virales TikTok-Produkt (englischsprachig) für den deutschen Haushaltsmarkt.
+Gib auf Deutsch an:
+1. Welches Problem löst es?
+2. Wie sieht die Lösung aus?
+3. Wer ist die Zielgruppe?
+4. Was ist das USP?
+5. Soll es im deutschen Shop verkauft werden?
+
+Beschreibung: {beschreibung}
+"""
+
+antwort = openai.ChatCompletion.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": prompt}],
+    temperature=0.7
+).choices[0].message.content.strip().split("\n")
+
+# === Dummy AliExpress-Händlersuche ===
+produktname = video['desc'].split()[0][:25]
+aliexpress_url = f"https://www.aliexpress.com/wholesale?SearchText={produktname.replace(' ', '+')}"
+
+# === Preiskalkulation (Platzhalter)
+ek = 7.99
 versand = 2.99
-vk = 19.99
-marge = vk - ek - versand
+vk = 24.99
+marge = round(vk - ek - versand, 2)
 
-# 📅 Zeitstempel
-heute = datetime.datetime.now().strftime("%d.%m.%Y")
-
-# 📄 Vorschlag in JSON-Format
+# === Vorschlag erzeugen ===
 vorschlag = {
-    "last_update": heute,
+    "last_update": datetime.datetime.now().strftime("%d.%m.%Y"),
     "vorschlaege": [
         {
-            "name": trendprodukt["name"],
+            "name": produktname,
             "problem": antwort[0].replace("1.", "").strip(),
             "loesung": antwort[1].replace("2.", "").strip(),
             "zielgruppe": antwort[2].replace("3.", "").strip(),
@@ -61,15 +70,17 @@ vorschlag = {
             "ek": ek,
             "vk": vk,
             "versand": versand,
-            "marge": round(marge, 2),
+            "marge": marge,
             "haendler": aliexpress_url,
-            "tiktok": trendprodukt["video_url"]
+            "tiktok": video_url,
+            "likes": likes,
+            "kommentare": comments,
+            "veroeffentlicht": date
         }
     ]
 }
 
-# 💾 Speichern
 with open("vorschlaege.json", "w", encoding="utf-8") as f:
     json.dump(vorschlag, f, indent=2, ensure_ascii=False)
 
-print("✅ Trend-Vorschlag erfolgreich generiert.")
+print("✅ Vorschlag generiert: " + produktname)
