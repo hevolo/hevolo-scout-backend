@@ -3,32 +3,44 @@ import json
 import datetime
 import openai
 import requests
+import random
 
 # API-Zugänge aus GitHub Secrets
 openai.api_key = os.getenv("OPENAI_API_KEY")
 tikapi_key = os.getenv("TIKAPI_KEY")
 
-# === TikAPI: Trending Video laden ===
+hashtags = ["tiktokmademebuyit", "cleantok", "viralcleaning", "kitchenhack"]
 headers = {"Authorization": f"Bearer {tikapi_key}"}
-response = requests.get(
-    "https://api.tikapi.io/hashtag/tiktokmademebuyit/feed?count=5",
-    headers=headers
-)
+video = None
 
-data = response.json()
-print(json.dumps(data, indent=2))
+def get_tiktok_videos(tag):
+    url = f"https://api.tikapi.io/public/hashtag?name={tag}&count=5"
+    response = requests.get(url, headers=headers)
+    print(f"TikAPI Antwort für #{tag}:", response.status_code)
+    try:
+        return response.json().get("data", [])
+    except Exception as e:
+        print("Fehler beim Verarbeiten der API-Antwort:", e)
+        return []
 
-video = data["data"][0] if data.get("data") else None
+for tag in hashtags:
+    print(f"🔍 Versuche Hashtag: #{tag}")
+    posts = get_tiktok_videos(tag)
+    for v in posts:
+        if v.get("desc") and v.get("id") and v.get("author"):
+            video = v
+            break
+    if video:
+        break
 
 if not video:
-    raise ValueError("Kein TikTok-Video gefunden.")
+    raise ValueError("Kein TikTok-Video zu den Hashtags gefunden.")
 
 video_url = f"https://www.tiktok.com/@{video['author']['unique_id']}/video/{video['id']}"
 likes = video['stats']['digg_count']
 comments = video['stats']['comment_count']
 date = datetime.datetime.fromtimestamp(video['create_time']).strftime('%d.%m.%Y')
 
-# === GPT: Produkt analysieren ===
 beschreibung = video['desc'][:1000]
 prompt = f"""
 Analysiere folgendes virales TikTok-Produkt (englischsprachig) für den deutschen Haushaltsmarkt.
@@ -48,17 +60,14 @@ antwort = openai.ChatCompletion.create(
     temperature=0.7
 ).choices[0].message.content.strip().split("\n")
 
-# === Dummy AliExpress-Händlersuche ===
 produktname = video['desc'].split()[0][:25]
 aliexpress_url = f"https://www.aliexpress.com/wholesale?SearchText={produktname.replace(' ', '+')}"
 
-# === Preiskalkulation (Platzhalter)
 ek = 7.99
 versand = 2.99
 vk = 24.99
 marge = round(vk - ek - versand, 2)
 
-# === Vorschlag erzeugen ===
 vorschlag = {
     "last_update": datetime.datetime.now().strftime("%d.%m.%Y"),
     "vorschlaege": [
