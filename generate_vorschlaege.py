@@ -23,7 +23,7 @@ def get_tiktok_videos(tag):
         print("Fehler beim Verarbeiten der API-Antwort:", e)
         return []
 
-for tag in hashtags:
+for tag in tag:
     print(f"🔍 Versuche Hashtag: #{tag}")
     posts = get_tiktok_videos(tag)
     for v in posts:
