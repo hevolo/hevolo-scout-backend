@@ -13,7 +13,7 @@ PRODUCT_CUES = ["buy", "shop now", "amazon", "order", "made me buy", "tiktok mad
 
 MIN_VORSCHLAEGE = 5
 PAGE_SIZE = 30
-MAX_ITERATIONEN = 100
+MAX_ITERATIONEN = 20
 
 def fetch_videos():
     url = "https://api.tikapi.io/public/explore"
