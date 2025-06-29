@@ -5,13 +5,17 @@ import requests
 
 TIKAPI_KEY = os.getenv("TIKAPI_KEY")
 HEADERS = {"Authorization": f"Bearer {TIKAPI_KEY}"}
-TIKAPI_URL = "https://api.tikapi.io/public/search"
+TIKAPI_URL = "https://api.tikapi.io/search/posts"
 
 KEYWORDS = ["hack", "must have", "life changing", "problem", "fix", "clean", "organize"]
 
 def fetch_tiktok_videos():
     query = "amazon must have for home"
-    params = {"q": query, "count": 10}
+    params = {
+        "query": query,
+        "count": 10,
+        "region": "US"
+    }
     res = requests.get(TIKAPI_URL, headers=HEADERS, params=params)
     res.raise_for_status()
     return res.json().get("data", [])
@@ -35,7 +39,7 @@ def run():
     new_data = []
     for v in raw:
         stats = v.get("stats", {})
-        comments_today = stats.get("comments", 0)  # simplifiziert
+        comments_today = stats.get("comments", 0)  # einfache Näherung
 
         if stats.get("shares", 0) < 1000 or stats.get("comments", 0) < 1000:
             continue
