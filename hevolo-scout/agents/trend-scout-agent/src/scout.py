@@ -5,7 +5,6 @@ import requests
 
 TIKAPI_KEY = os.getenv("TIKAPI_KEY")
 HEADERS = {"Authorization": f"Bearer {TIKAPI_KEY}"}
-TIKAPI_URL = "https://api.tikapi.io/public/hashtag"
 
 KEYWORDS = ["hack", "must have", "life changing", "problem", "fix", "clean", "organize"]
 
@@ -13,7 +12,7 @@ def fetch_tiktok_videos():
     url = "https://api.tikapi.io/public/hashtag/feed"
     params = {
         "name": "tiktokmademebuyit",
-        "count": 30
+        "count": 500
     }
     res = requests.get(url, headers={"X-API-KEY": TIKAPI_KEY}, params=params)
     res.raise_for_status()
