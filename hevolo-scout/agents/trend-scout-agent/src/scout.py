@@ -9,9 +9,9 @@ HEADERS = {"Authorization": f"Bearer {TIKAPI_KEY}"}
 KEYWORDS = ["hack", "must have", "life changing", "problem", "fix", "clean", "organize"]
 
 def fetch_tiktok_videos():
-    url = "https://api.tikapi.io/public/hashtag"
+    url = "https://api.tikapi.io/public/explore"
     params = {
-        "name": "tiktokmademebuyit",
+        "country": "us",
         "count": 30
     }
     res = requests.get(url, headers={"X-API-KEY": TIKAPI_KEY}, params=params)
