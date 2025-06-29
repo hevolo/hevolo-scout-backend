@@ -4,19 +4,20 @@ import requests
 import time
 from datetime import datetime
 
-TIKAPI_KEY = os.getenv("TIKAPI_KEY")
+TIKAPI_KEY = os.getenv("X-API-KEY") or os.getenv("TIKAPI_KEY")
 HEADERS = {"X-API-KEY": TIKAPI_KEY}
+
 KEYWORDS = ["hack", "must have", "life changing", "problem", "fix", "clean", "organize"]
+BLACKLIST = ["diy", "funny", "prank", "recipe", "life hack", "tutorial", "hack your", "dance", "workout", "routine", "joke"]
+PRODUCT_CUES = ["buy", "shop now", "amazon", "order", "made me buy", "tiktok made me buy", "link in bio", "get yours", "unboxing", "review"]
+
 MIN_VORSCHLAEGE = 10
 PAGE_SIZE = 30
 MAX_ITERATIONEN = 10
 
 def fetch_videos():
     url = "https://api.tikapi.io/public/explore"
-    params = {
-        "country": "us",
-        "count": PAGE_SIZE
-    }
+    params = {"country": "us", "count": PAGE_SIZE}
     res = requests.get(url, headers=HEADERS, params=params)
     print(f"Status: {res.status_code} / URL: {res.url}")
     res.raise_for_status()
@@ -24,6 +25,14 @@ def fetch_videos():
 
 def is_problem_solver(desc):
     return any(kw in desc.lower() for kw in KEYWORDS)
+
+def is_product_video(desc):
+    desc = desc.lower()
+    if any(bad in desc for bad in BLACKLIST):
+        return False
+    if any(cue in desc for cue in PRODUCT_CUES):
+        return True
+    return False
 
 def load_existing(path):
     if os.path.exists(path):
@@ -47,27 +56,32 @@ def run():
     while len(new_data) < MIN_VORSCHLAEGE and versuche < MAX_ITERATIONEN:
         raw = fetch_videos()
         print(f"📥 Runde {versuche+1}: {len(raw)} Videos geladen")
+
         for v in raw:
             stats = v.get("stats", {})
             shares = stats.get("shareCount", 0)
             comments = stats.get("commentCount", 0)
             likes = stats.get("diggCount", 0)
+            desc = v.get("desc", "")
 
-            print(f"🔎 {shares} Shares / {comments} Comments / {likes} Likes | {v.get('desc', '')[:60]}")
+            print(f"🔎 {shares} Shares / {comments} Comments / {likes} Likes | {desc[:60]}")
 
             if shares < 1000 or comments < 1000:
                 continue
-            if not is_problem_solver(v.get("desc", "")):
+            if not is_problem_solver(desc):
+                continue
+            if not is_product_video(desc):
+                print("🚫 Kein Produktvideo laut Filter.")
                 continue
 
             eintrag = {
-                "titel": v.get("desc", "")[:80],
+                "titel": desc[:80],
                 "tiktok_link": f"https://www.tiktok.com/@{v.get('author', {}).get('uniqueId', '')}/video/{v.get('id', '')}",
                 "shares": shares,
                 "kommentare_total": comments,
                 "kommentare_aktuell": "nicht geprüft",
                 "likes": likes,
-                "video_beschreibung": v.get("desc", ""),
+                "video_beschreibung": desc,
                 "video_datum": v.get("createTime", ""),
                 "problemloeser": True,
                 "nische": "Küche, Haushalt & Wohnen",
