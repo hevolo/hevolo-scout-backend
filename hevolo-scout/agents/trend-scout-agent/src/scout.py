@@ -60,7 +60,10 @@ def run():
         }
         new_data.append(eintrag)
 
-    path = os.path.join("data", "vorschlaege.json")
+    output_dir = "data"
+    os.makedirs(output_dir, exist_ok=True)
+    path = os.path.join(output_dir, "vorschlaege.json")
+
     existing = load_existing(path)
     save_output(path, existing + new_data)
 
