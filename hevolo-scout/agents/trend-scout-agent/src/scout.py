@@ -6,15 +6,13 @@ import requests
 import time
 
 TIKAPI_KEY = os.getenv("TIKAPI_KEY")
-
 KEYWORDS = ["hack", "must have", "life changing", "problem", "fix", "clean", "organize"]
 
 def fetch_tiktok_videos():
-    url = "https://api.tikapi.io/search/posts"
+    url = "https://api.tikapi.io/public/hashtag"
     params = {
-        "query": "tiktok made me buy it",
-        "count": 30,
-        "region": "US"
+        "name": "tiktokmademebuyit",
+        "count": 30
     }
     headers = {
         "X-API-KEY": TIKAPI_KEY
@@ -66,7 +64,6 @@ def run():
         comments = stats.get("comment_count", 0)
         likes = stats.get("like_count", 0)
 
-        # BAUMDICK-Kriterien: Shares + Kommentare
         if shares < 1000 or comments < 1000:
             continue
 
@@ -86,8 +83,7 @@ def run():
         }
         print(f"✅ Hinzugefügt: {eintrag['titel']} | Shares: {shares}, Comments: {comments}")
         new_data.append(eintrag)
-
-        time.sleep(1)  # API-Ratenbegrenzung einhalten
+        time.sleep(1)
 
     print(f"🧮 Nach Filter gültige Vorschläge: {len(new_data)}")
 
