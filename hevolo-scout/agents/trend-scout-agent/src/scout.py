@@ -12,7 +12,7 @@ def fetch_tiktok_videos():
     url = "https://api.tikapi.io/public/hashtag"
     params = {
         "name": "tiktokmademebuyit",
-        "count": 500
+        "count": 30
     }
     res = requests.get(url, headers={"X-API-KEY": TIKAPI_KEY}, params=params)
     res.raise_for_status()
@@ -44,10 +44,10 @@ def run():
         stats = v.get("stats", {})
         comments_today = stats.get("comments", 0)  # Näherung
 
-        if stats.get("shares", 0) < 100 or stats.get("comments", 0) < 100:
-            continue
-        if comments_today < 1:
-            continue
+        #if stats.get("shares", 0) < 100 or stats.get("comments", 0) < 100:
+            #continue
+        #if comments_today < 1:
+            #continue
 
         eintrag = {
             "titel": v.get("desc", "")[:80],
