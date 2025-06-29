@@ -13,7 +13,7 @@ def fetch_tiktok_videos():
     url = "https://api.tikapi.io/public/explore"
     params = {
         "country": "us",
-        "count": 10
+        "count": 30
     }
     headers = {
         "X-API-KEY": TIKAPI_KEY
