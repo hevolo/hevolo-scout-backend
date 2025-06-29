@@ -71,7 +71,7 @@ def run():
 
     print(f"🧮 Nach Filter gültige Vorschläge: {len(new_data)}")
 
-    output_dir = "data"
+    output_dir = os.path.join("hevolo-scout", "data")
     os.makedirs(output_dir, exist_ok=True)
     path = os.path.join(output_dir, "vorschlaege.json")
 
