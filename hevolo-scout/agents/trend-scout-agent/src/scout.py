@@ -23,7 +23,9 @@ def fetch_tiktok_videos():
     res.raise_for_status()
     data = res.json()
     print(f"Keys: {list(data.keys())}")
-    return data.get("items", [])
+    return data.get("itemList", [])
+
+print(f"🎬 Videos erhalten: {len(data.get('itemList', []))}")
 
 def is_problem_solver(desc):
     desc = desc.lower()
