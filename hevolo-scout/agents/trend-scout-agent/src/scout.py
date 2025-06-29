@@ -10,19 +10,16 @@ TIKAPI_URL = "https://api.tikapi.io/public/hashtag"
 KEYWORDS = ["hack", "must have", "life changing", "problem", "fix", "clean", "organize"]
 
 def fetch_tiktok_videos():
-    candidates = [
-        {"url": "https://api.tikapi.io/public/hashtag", "params": {"name": "tiktokmademebuyit", "count": 30}},
-        {"url": "https://api.tikapi.io/public/hashtag", "params": {"tag": "tiktokmademebuyit", "count": 30}},
-    ]
-    for c in candidates:
-        print(f"🧪 Test Endpoint: {c['url']} with params {c['params']}")
-        res = requests.get(c["url"], headers={"X-API-KEY": TIKAPI_KEY}, params=c["params"])
-        print(f"→ HTTP {res.status_code}, keys: {list(res.json().keys())}")
-        if res.status_code == 200 and len(res.json().get("items", [])) > 0:
-            print("✅ Items gefunden")
-            return res.json()["items"]
-    print("⚠️ Keine Items gefunden in beiden Tests")
-    return []
+    url = "https://api.tikapi.io/public/hashtag/feed"
+    params = {
+        "name": "tiktokmademebuyit",
+        "count": 30
+    }
+    res = requests.get(url, headers={"X-API-KEY": TIKAPI_KEY}, params=params)
+    res.raise_for_status()
+    data = res.json()
+    print(f"→ TikAPI response keys: {list(data.keys())}")
+    return data.get("items", [])
 
 def is_problem_solver(desc):
     desc = desc.lower()
