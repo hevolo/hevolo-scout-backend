@@ -5,7 +5,7 @@ import requests
 
 TIKAPI_KEY = os.getenv("TIKAPI_KEY")
 HEADERS = {"Authorization": f"Bearer {TIKAPI_KEY}"}
-TIKAPI_URL = "https://api.tikapi.io/trending/feed"
+TIKAPI_URL = "https://api.tikapi.io/explore/feed"
 
 KEYWORDS = ["hack", "must have", "life changing", "problem", "fix", "clean", "organize"]
 
