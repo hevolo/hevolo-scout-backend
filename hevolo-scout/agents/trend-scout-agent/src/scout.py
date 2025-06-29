@@ -47,6 +47,8 @@ def run():
         comments = stats.get("commentCount", 0)
         likes = stats.get("diggCount", 0)
 
+        print(f"🔎 {shares} Shares / {comments} Comments / {likes} Likes | {v.get('desc', '')[:60]}")
+
         if shares < 1000 or comments < 1000:
             continue
         if not is_problem_solver(v.get("desc", "")):
