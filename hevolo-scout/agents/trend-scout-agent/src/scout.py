@@ -18,14 +18,11 @@ def fetch_tiktok_videos():
     }
     res = requests.get(url, headers=headers, params=params)
     print(f"Status: {res.status_code} / URL: {res.url}")
-    if res.status_code == 403:
-        print(f"❌ Zugriff verweigert: {res.text}")
     res.raise_for_status()
     data = res.json()
     print(f"Keys: {list(data.keys())}")
+    print(f"🎬 Videos erhalten: {len(data.get('itemList', []))}")
     return data.get("itemList", [])
-
-print(f"🎬 Videos erhalten: {len(data.get('itemList', []))}")
 
 def is_problem_solver(desc):
     desc = desc.lower()
