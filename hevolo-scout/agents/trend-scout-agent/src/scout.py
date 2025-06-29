@@ -33,15 +33,18 @@ def save_output(path, data):
         json.dump(data, f, indent=2)
 
 def run():
+    print("🟡 Agent gestartet …")
     raw = fetch_tiktok_videos()
+    print(f"🟢 API Response length: {len(raw)}")
+
     new_data = []
     for v in raw:
         stats = v.get("stats", {})
         comments_today = stats.get("comments", 0)  # Näherung
 
-        if stats.get("shares", 0) < 1000 or stats.get("comments", 0) < 1000:
+        if stats.get("shares", 0) < 100 or stats.get("comments", 0) < 100:
             continue
-        if comments_today < 10:
+        if comments_today < 1:
             continue
 
         eintrag = {
@@ -60,16 +63,15 @@ def run():
         }
         new_data.append(eintrag)
 
+    print(f"🧮 Nach Filter gültige Vorschläge: {len(new_data)}")
+
     output_dir = "data"
     os.makedirs(output_dir, exist_ok=True)
     path = os.path.join(output_dir, "vorschlaege.json")
 
     existing = load_existing(path)
     save_output(path, existing + new_data)
-
-print(f"API Response length: {len(raw)}")
-print(f"Nach Filter: {len(new_data)} gültige Vorschläge")
-print(f"Zielpfad: {path}")
+    print(f"✅ Daten in {path} gespeichert: {len(existing + new_data)} Gesamtvorschläge")
 
 if __name__ == "__main__":
     run()
