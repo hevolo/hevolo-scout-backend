@@ -4,7 +4,6 @@ from datetime import datetime
 import requests
 
 TIKAPI_KEY = os.getenv("TIKAPI_KEY")
-HEADERS = {"Authorization": f"Bearer {TIKAPI_KEY}"}
 
 KEYWORDS = ["hack", "must have", "life changing", "problem", "fix", "clean", "organize"]
 
@@ -12,12 +11,18 @@ def fetch_tiktok_videos():
     url = "https://api.tikapi.io/public/explore"
     params = {
         "country": "us",
-        "count": 30
+        "count": 10
     }
-    res = requests.get(url, headers={"X-API-KEY": TIKAPI_KEY}, params=params)
+    headers = {
+        "X-API-KEY": TIKAPI_KEY
+    }
+    res = requests.get(url, headers=headers, params=params)
+    print(f"Status: {res.status_code} / URL: {res.url}")
+    if res.status_code == 403:
+        print(f"❌ Zugriff verweigert: {res.text}")
     res.raise_for_status()
     data = res.json()
-    print(f"→ TikAPI response keys: {list(data.keys())}")
+    print(f"Keys: {list(data.keys())}")
     return data.get("items", [])
 
 def is_problem_solver(desc):
