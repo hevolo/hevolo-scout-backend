@@ -67,5 +67,9 @@ def run():
     existing = load_existing(path)
     save_output(path, existing + new_data)
 
+print(f"API Response length: {len(raw)}")
+print(f"Nach Filter: {len(new_data)} gültige Vorschläge")
+print(f"Zielpfad: {path}")
+
 if __name__ == "__main__":
     run()
