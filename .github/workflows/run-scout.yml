@@ -19,4 +19,4 @@ jobs:
       - name: Run scout
         env:
           TIKAPI_KEY: ${{ secrets.TIKAPI_KEY }}
-        run: python agents/trend-scout/src/scout.py
+        run: python hevolo-scout/agents/trend-scout-agent/src/scout.py
