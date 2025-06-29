@@ -11,9 +11,9 @@ KEYWORDS = ["hack", "must have", "life changing", "problem", "fix", "clean", "or
 BLACKLIST = ["diy", "funny", "prank", "recipe", "life hack", "tutorial", "hack your", "dance", "workout", "routine", "joke"]
 PRODUCT_CUES = ["buy", "shop now", "amazon", "order", "made me buy", "tiktok made me buy", "link in bio", "get yours", "unboxing", "review"]
 
-MIN_VORSCHLAEGE = 10
+MIN_VORSCHLAEGE = 5
 PAGE_SIZE = 30
-MAX_ITERATIONEN = 10
+MAX_ITERATIONEN = 100
 
 def fetch_videos():
     url = "https://api.tikapi.io/public/explore"
