@@ -94,16 +94,16 @@ def run():
                     "erstellt_am": datetime.today().strftime("%Y-%m-%d")
                 }
                 valid.append(eintrag)
-                if len(valid) >= 10:
+                if len(valid) >= 5:
                     break
-        if len(valid) >= 10:
+        if len(valid) >= 5:
             break
         time.sleep(2)
 
     print(f"🧮 Gefundene Vorschläge: {len(valid)}")
     save_output(path, existing + valid)
     print(f"✅ Vorschläge gespeichert in {path}: {len(existing + valid)} gesamt")
-    if len(valid) < 10:
+    if len(valid) < 5:
         print("🔁 Zu wenig gültige Vorschläge – Trigger für Neustart.")
         exit(99)
 
