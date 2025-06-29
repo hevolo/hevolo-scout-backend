@@ -15,7 +15,7 @@ jobs:
         with:
           python-version: '3.x'   # <– automatische stabile Version
       - name: Install dependencies
-        run: pip install -r agents/trend-scout/requirements.txt
+        run: pip install -r requirements.txt
       - name: Run scout
         env:
           TIKAPI_KEY: ${{ secrets.TIKAPI_KEY }}
