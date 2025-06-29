@@ -31,8 +31,9 @@ jobs:
       - name: 💾 Änderungen committen
         run: |
           git config user.name "hevolo-agent"
-          git config user.email "agent@hevolo.de"
-          git add hevolo-scout/data/vorschlaege.json
+          git config user.email "team@hevolo.de"
+          git add hevolo-scout/data/*
+          git status
           if git diff --cached --quiet; then
             echo "✅ Keine Änderungen – kein Commit notwendig"
           else
