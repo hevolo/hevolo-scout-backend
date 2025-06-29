@@ -14,7 +14,7 @@ def fetch_tiktok_videos():
         "name": "tiktokmademebuyit",
         "count": 30
     }
-    res = requests.get(url, headers={"X-API-KEY": TIKAPI_KEY}, params=params)
+    res = requests.get(TIKAPI_URL, headers={"X-API-KEY": TIKAPI_KEY}, params=params)
     res.raise_for_status()
     return res.json().get("items", [])
 
