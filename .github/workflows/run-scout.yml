@@ -8,15 +8,34 @@ on:
 jobs:
   scout:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python
+      - name: 📥 Repository klonen
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: true  # wichtig für push!
+
+      - name: 🐍 Python installieren
         uses: actions/setup-python@v4
         with:
-          python-version: '3.x'   # <– automatische stabile Version
-      - name: Install dependencies
+          python-version: '3.x'
+
+      - name: 📦 Abhängigkeiten installieren
         run: pip install -r requirements.txt
-      - name: Run scout
+
+      - name: 🤖 Scout-Agent ausführen
         env:
           TIKAPI_KEY: ${{ secrets.TIKAPI_KEY }}
         run: python hevolo-scout/agents/trend-scout-agent/src/scout.py
+
+      - name: 💾 Änderungen committen
+        run: |
+          git config user.name "hevolo-agent"
+          git config user.email "agent@hevolo.de"
+          git add hevolo-scout/data/vorschlaege.json
+          if git diff --cached --quiet; then
+            echo "✅ Keine Änderungen – kein Commit notwendig"
+          else
+            git commit -m "auto: update vorschlaege.json"
+            git push
+          fi
