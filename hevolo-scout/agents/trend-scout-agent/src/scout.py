@@ -5,18 +5,18 @@ import requests
 
 TIKAPI_KEY = os.getenv("TIKAPI_KEY")
 HEADERS = {"Authorization": f"Bearer {TIKAPI_KEY}"}
-TIKAPI_URL = "https://api.tikapi.io/public/explore"
+TIKAPI_URL = "https://api.tikapi.io/public/hashtag"
 
 KEYWORDS = ["hack", "must have", "life changing", "problem", "fix", "clean", "organize"]
 
 def fetch_tiktok_videos():
     params = {
-        "country": "us",
-        "count": 10
+        "name": "tiktokmademebuyit",
+        "count": 30
     }
-    res = requests.get(TIKAPI_URL, headers={"X-API-KEY": TIKAPI_KEY}, params=params)
+    res = requests.get(url, headers={"X-API-KEY": TIKAPI_KEY}, params=params)
     res.raise_for_status()
-    return res.json().get("items", [])  # oder je nach Dokumentation 'data' oder 'items'
+    return res.json().get("items", [])
 
 def is_problem_solver(desc):
     desc = desc.lower()
