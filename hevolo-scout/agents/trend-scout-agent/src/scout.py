@@ -1,47 +1,65 @@
 import json
 import os
-import requests
 import time
 from datetime import datetime
+import requests
 
-TIKAPI_KEY = os.getenv("X-API-KEY") or os.getenv("TIKAPI_KEY")
+TIKAPI_KEY = os.getenv("TIKAPI_KEY")
 HEADERS = {"X-API-KEY": TIKAPI_KEY}
 
-KEYWORDS = ["hack", "must have", "life changing", "problem", "fix", "clean", "organize"]
-BLACKLIST = ["diy", "funny", "prank", "recipe", "life hack", "tutorial", "hack your", "dance", "workout", "routine", "joke"]
-PRODUCT_CUES = ["buy", "shop now", "amazon", "order", "made me buy", "tiktok made me buy", "link in bio", "get yours", "unboxing", "review"]
+KEYWORDS_PRODUKTINTENTION = [
+    "buy", "link in bio", "amazon", "find it", "where to buy", "tiktokmademebuyit",
+    "must have", "product", "as seen", "problem", "solution", "organizer"
+]
 
-MIN_VORSCHLAEGE = 5
-PAGE_SIZE = 30
-MAX_ITERATIONEN = 20
+BLACKLIST_KEYWORDS = [
+    "funny", "prank", "fail", "dance", "meme", "edit", "filter", "trend", "capcut",
+    "fortnite", "minecraft", "baby", "relationship", "song", "music", "cat", "dog", "ai"
+]
+
+HOUSEHOLD_KEYWORDS = [
+    "kitchen", "home", "clean", "organize", "dish", "fridge", "sink", "pan", "drawer",
+    "storage", "closet", "laundry", "household", "gadget", "tool", "bathroom", "cook"
+]
 
 def fetch_videos():
     url = "https://api.tikapi.io/public/explore"
-    params = {"country": "us", "count": PAGE_SIZE}
+    params = {"country": "us", "count": 30}
     res = requests.get(url, headers=HEADERS, params=params)
     print(f"Status: {res.status_code} / URL: {res.url}")
     res.raise_for_status()
-    return res.json().get("itemList", [])
+    data = res.json()
+    return data.get("itemList", [])
 
-def is_problem_solver(desc):
-    return any(kw in desc.lower() for kw in KEYWORDS)
+def is_valid_video(v):
+    desc = v.get("desc", "").lower()
+    stats = v.get("stats", {})
+    shares = stats.get("shareCount", 0)
+    comments = stats.get("commentCount", 0)
+    likes = stats.get("diggCount", 0)
 
-def is_product_video(desc):
-    desc = desc.lower()
-    if any(bad in desc for bad in BLACKLIST):
+    print(f"🔎 {shares} Shares / {comments} Comments / {likes} Likes | {desc[:80]}")
+    if any(bad in desc for bad in BLACKLIST_KEYWORDS):
+        print("🚫 Blacklist-Treffer – übersprungen.")
         return False
-    if any(cue in desc for cue in PRODUCT_CUES):
-        return True
-    return False
+    if not any(kw in desc for kw in KEYWORDS_PRODUKTINTENTION):
+        print("🚫 Keine Kauf-Intention – übersprungen.")
+        return False
+    if not any(hw in desc for hw in HOUSEHOLD_KEYWORDS):
+        print("🚫 Keine Haushaltsnische – übersprungen.")
+        return False
+    if shares < 500 or comments < 200:
+        print("🚫 Zu wenig Engagement – übersprungen.")
+        return False
+    return True
 
 def load_existing(path):
-    if os.path.exists(path):
-        try:
+    try:
+        if os.path.exists(path):
             with open(path, "r") as f:
                 return json.load(f)
-        except json.JSONDecodeError:
-            print("⚠️ JSON-Datei beschädigt – wird neu erstellt.")
-            return []
+    except json.JSONDecodeError:
+        print("⚠️ JSON defekt – beginne neu.")
     return []
 
 def save_output(path, data):
@@ -50,63 +68,44 @@ def save_output(path, data):
 
 def run():
     print("🟡 Agent gestartet …")
-    new_data = []
-    versuche = 0
-
-    while len(new_data) < MIN_VORSCHLAEGE and versuche < MAX_ITERATIONEN:
-        raw = fetch_videos()
-        print(f"📥 Runde {versuche+1}: {len(raw)} Videos geladen")
-
-        for v in raw:
-            stats = v.get("stats", {})
-            shares = stats.get("shareCount", 0)
-            comments = stats.get("commentCount", 0)
-            likes = stats.get("diggCount", 0)
-            desc = v.get("desc", "")
-
-            print(f"🔎 {shares} Shares / {comments} Comments / {likes} Likes | {desc[:60]}")
-
-            if shares < 1000 or comments < 1000:
-                continue
-            if not is_problem_solver(desc):
-                continue
-            if not is_product_video(desc):
-                print("🚫 Kein Produktvideo laut Filter.")
-                continue
-
-            eintrag = {
-                "titel": desc[:80],
-                "tiktok_link": f"https://www.tiktok.com/@{v.get('author', {}).get('uniqueId', '')}/video/{v.get('id', '')}",
-                "shares": shares,
-                "kommentare_total": comments,
-                "kommentare_aktuell": "nicht geprüft",
-                "likes": likes,
-                "video_beschreibung": desc,
-                "video_datum": v.get("createTime", ""),
-                "problemloeser": True,
-                "nische": "Küche, Haushalt & Wohnen",
-                "status": "VORSCHLAG",
-                "erstellt_am": datetime.today().strftime("%Y-%m-%d")
-            }
-
-            print(f"✅ Gefiltert: {eintrag['titel']} | Shares: {shares}, Comments: {comments}")
-            new_data.append(eintrag)
-
-            if len(new_data) >= MIN_VORSCHLAEGE:
-                break
-
-        versuche += 1
-        time.sleep(1)
-
-    print(f"🧮 Gültige Vorschläge: {len(new_data)}")
-
     output_dir = os.path.join("hevolo-scout", "data")
     os.makedirs(output_dir, exist_ok=True)
     path = os.path.join(output_dir, "vorschlaege.json")
 
     existing = load_existing(path)
-    save_output(path, existing + new_data)
-    print(f"✅ Vorschläge gespeichert in {path}: {len(existing + new_data)} gesamt")
+    valid = []
+
+    for runde in range(1, 16):
+        raw = fetch_videos()
+        print(f"📥 Runde {runde}: {len(raw)} Videos geladen")
+
+        for v in raw:
+            if is_valid_video(v):
+                eintrag = {
+                    "titel": v.get("desc", "")[:80],
+                    "tiktok_link": f"https://www.tiktok.com/@{v.get('author', {}).get('uniqueId', '')}/video/{v.get('id', '')}",
+                    "shares": v.get("stats", {}).get("shareCount", 0),
+                    "kommentare_total": v.get("stats", {}).get("commentCount", 0),
+                    "likes": v.get("stats", {}).get("diggCount", 0),
+                    "video_beschreibung": v.get("desc", ""),
+                    "video_datum": v.get("createTime", ""),
+                    "nische": "Küche, Haushalt & Wohnen",
+                    "status": "VORSCHLAG",
+                    "erstellt_am": datetime.today().strftime("%Y-%m-%d")
+                }
+                valid.append(eintrag)
+                if len(valid) >= 10:
+                    break
+        if len(valid) >= 10:
+            break
+        time.sleep(2)
+
+    print(f"🧮 Gefundene Vorschläge: {len(valid)}")
+    save_output(path, existing + valid)
+    print(f"✅ Vorschläge gespeichert in {path}: {len(existing + valid)} gesamt")
+    if len(valid) < 10:
+        print("🔁 Zu wenig gültige Vorschläge – Trigger für Neustart.")
+        exit(99)
 
 if __name__ == "__main__":
     run()
